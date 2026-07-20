@@ -264,3 +264,31 @@ function fillTriangle(RenderCanvas, a, b, c, color)
         }
     }
 }
+
+async function loadModel(file)
+{
+    const response = await fetch(file);
+    const data = await response.json();
+
+    // Load vertices
+    cube = Object.values(data.VS).map(
+        ([x, y, z]) => new Pos(x, y, z)
+    );
+
+    // Generate edges from faces
+    edges = [];
+
+    for (const group of Object.values(data.FS))
+    {
+        for (const face of group)
+        {
+            for (let i = 0; i < face.length; i++)
+            {
+                edges.push([
+                    face[i],
+                    face[(i + 1) % face.length]
+                ]);
+            }
+        }
+    }
+}
