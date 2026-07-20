@@ -21,8 +21,20 @@
 //SOFTWARE.
 
 
+window.alert("Use W, A, S, D and Mouse to Move There are some bugs this is a demo...");
+
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
+
+const buffer = new RenderCanvas(
+    window.innerWidth,
+    window.innerHeight
+);
+
+const size = new Screen(
+    window.innerWidth,
+    window.innerHeight
+);
 
 function resize() {
     canvas.width = window.innerWidth;
@@ -38,51 +50,163 @@ function resize() {
     size.HEIGHT = canvas.height;
 }
 
-const buffer = new RenderCanvas(
-    window.innerWidth,
-    window.innerHeight
-);
-
-const size = new Screen(
-    window.innerWidth,
-    window.innerHeight
-);
-
 window.addEventListener("resize", resize);
 
 const green = new Color(0, 255, 0);
 const black = new Color(0, 0, 0);
 
-// These will be filled by loadModel()
 let cube = [];
 let edges = [];
+
+const camera = new Camera(
+    0,
+    0,
+    -8,
+    90
+);
+
+
+// INPUT
+
+const keys = {};
+
+window.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+});
+
+window.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+
+// MOUSE LOOK
+
+let mouseLocked = false;
+const mouseSensitivity = 0.002;
+
+canvas.addEventListener("click", () => {
+    canvas.requestPointerLock();
+});
+
+document.addEventListener("pointerlockchange", () => {
+    mouseLocked =
+        document.pointerLockElement === canvas;
+});
+
+document.addEventListener("mousemove", e => {
+    if (!mouseLocked)
+        return;
+
+    camera.yaw -= e.movementX * mouseSensitivity;
+    camera.pitch += e.movementY * mouseSensitivity;
+
+    const limit = Math.PI / 2 - 0.05;
+
+    camera.pitch = Math.max(
+        -limit,
+        Math.min(limit, camera.pitch)
+    );
+});
+
+
+// CAMERA
+
+function resetCamera() {
+    camera.position.x = 0;
+    camera.position.y = 0;
+    camera.position.z = -8;
+
+    camera.yaw = 0;
+    camera.pitch = 0;
+}
+
+
+function updateCamera() {
+    const speed = 0.15;
+
+    const forwardX = Math.sin(camera.yaw);
+    const forwardZ = Math.cos(camera.yaw);
+
+    const rightX = Math.cos(camera.yaw);
+    const rightZ = -Math.sin(camera.yaw);
+
+    if (keys["w"]) {
+        camera.position.x += forwardX * speed;
+        camera.position.z += forwardZ * speed;
+    }
+
+    if (keys["s"]) {
+        camera.position.x -= forwardX * speed;
+        camera.position.z -= forwardZ * speed;
+    }
+
+    if (keys["a"]) {
+        camera.position.x -= rightX * speed;
+        camera.position.z -= rightZ * speed;
+    }
+
+    if (keys["d"]) {
+        camera.position.x += rightX * speed;
+        camera.position.z += rightZ * speed;
+    }
+
+    if (keys[" "])
+        camera.position.y += speed;
+
+    if (keys["shift"])
+        camera.position.y -= speed;
+
+    if (keys["r"])
+        resetCamera();
+}
+
+
+// RENDER
 
 let angle = 0;
 
 function loop() {
-    clearRenderCanvas(buffer, black);
+    updateCamera();
+
+    clearRenderCanvas(
+        buffer,
+        black
+    );
 
     const projected = [];
+    const SCALE = 4.5;
 
-    const SCALE = 4.5; // Increase this value
+    for (const vertex of cube) {
 
-    for (const vertex of cube){
         let p = new Pos(
             vertex.x * SCALE,
             vertex.y * SCALE,
             vertex.z * SCALE
         );
 
-        p = rotateY(p, angle);
-        p = rotateY(p, angle * 0.5);
+        // object rotation
+        p = rotateY(
+            p,
+            angle
+        );
 
-        p = translate_z(p, 4);
+        p = rotateY(
+            p,
+            angle * 0.5
+        );
 
-        p = project(p);
-        p = screen(p, size);
+        // camera
+        p = camera.projectCamera(
+            p,
+            size.WIDTH,
+            size.HEIGHT
+        );
 
-        projected.push(p);
+        projected.push(
+            p || new Pos(-100, -100, 0)
+        );
     }
+
 
     for (const edge of edges) {
         drawLine(
@@ -94,18 +218,24 @@ function loop() {
         );
     }
 
-    updateRenderCanvas(buffer, ctx);
+
+    updateRenderCanvas(
+        buffer,
+        ctx
+    );
 
     angle += 0.02;
 
     requestAnimationFrame(loop);
 }
 
+
 async function start() {
     resize();
 
-    // Load model.json from the same directory
-    await loadModel("model.json");
+    await loadModel(
+        "model.json"
+    );
 
     loop();
 }

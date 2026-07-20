@@ -73,6 +73,65 @@ class Circle {
   }
 }
 
+class Camera {
+  constructor(x = 0, y = 0, z = -5, fov = 90) {
+    this.position = new Pos(x, y, z);
+
+    // radians
+    this.pitch = 0;
+    this.yaw = 0;
+    this.roll = 0;
+
+    // degrees
+    this.fov = fov;
+  }
+
+  move(x, y, z) {
+    this.position.x += x;
+    this.position.y += y;
+    this.position.z += z;
+  }
+
+  rotate(pitch, yaw, roll = 0) {
+    this.pitch += pitch;
+    this.yaw += yaw;
+    this.roll += roll;
+  }
+
+  worldToCamera(point) {
+    let p = new Pos(
+      point.x - this.position.x,
+      point.y - this.position.y,
+      point.z - this.position.z
+    );
+
+    // inverse camera rotation
+    p = rotateZ(p, -this.roll);
+    p = rotateX(p, -this.pitch);
+    p = rotateY(p, -this.yaw);
+
+    return p;
+  }
+
+  projectCamera(point, width, height) {
+    const p = this.worldToCamera(point);
+
+    if (p.z <= 0.01)
+      return null;
+
+    const f = 1 / Math.tan(
+      (this.fov * Math.PI / 180) / 2
+    );
+
+    return new Pos(
+      (p.x * f / p.z) * height + width / 2,
+      -(p.y * f / p.z) * height + height / 2,
+      p.z
+    );
+  }
+}
+
+
 let pos = new Pos(0.0, 0.0, 0.0);
 
 function Set_Size(ctx, width, height) {
