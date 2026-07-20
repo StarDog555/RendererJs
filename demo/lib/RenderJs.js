@@ -1,0 +1,266 @@
+const FPS = 60;
+const dt = 1.0 / FPS;
+let RUNNING = true;
+
+class Pos {
+  constructor(x = 0, y = 0, z = 0) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+}
+
+class Screen {
+  constructor(width = 0, height = 0) {
+    this.WIDTH = width;
+    this.HEIGHT = height;
+  }
+}
+
+class Color {
+  constructor(r = 0, g = 0, b = 0) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+  }
+}
+
+class RenderCanvas {
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
+    this.pixels = new Uint8ClampedArray(width * height * 4);
+  }
+}
+
+class Rect {
+  constructor(width, height, x, y) {
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+  }
+}
+
+class Circle {
+  constructor(radius, x, y) {
+    this.radius = radius;
+    this.x = x;
+    this.y = y;
+  }
+}
+
+let pos = new Pos(0.0, 0.0, 0.0);
+
+function Set_Size(ctx, width, height) {
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+}
+
+function clearRenderCanvas(RenderCanvas, color) {
+    for (let i = 0; i < RenderCanvas.width * RenderCanvas.height; i++) {
+      let index = i * 4;
+  
+      RenderCanvas.pixels[index] = color.r;
+      RenderCanvas.pixels[index + 1] = color.g;
+      RenderCanvas.pixels[index + 2] = color.b;
+      RenderCanvas.pixels[index + 3] = 255;
+    }
+}
+
+function updateRenderCanvas(RenderCanvas, ctx) {
+    const image = new ImageData(
+      RenderCanvas.pixels,
+      RenderCanvas.width,
+      RenderCanvas.height
+    );
+  
+    ctx.putImageData(image, 0, 0);
+}
+
+function screen(p, Size) {
+    const scale = Size.HEIGHT * 0.5;
+  
+    return new Pos(
+      Size.WIDTH * 0.5 + p.x * scale,
+      Size.HEIGHT * 0.5 - p.y * scale,
+      p.z
+    );
+}
+
+function project(p) {
+    if (p.z === 0) return new Pos(0, 0, p.z);
+
+    return new Pos(
+      p.x / p.z,
+      p.y / p.z,
+      p.z
+    );
+}
+
+function drawPixel(RenderCanvas, p, color) {
+    if (
+      p.x < 0 ||
+      p.y < 0 ||
+      p.x >= RenderCanvas.width ||
+      p.y >= RenderCanvas.height
+    ) return;
+  
+    const x = Math.floor(p.x);
+    const y = Math.floor(p.y);
+  
+    const index = (y * RenderCanvas.width + x) * 4;
+  
+    RenderCanvas.pixels[index] = color.r;
+    RenderCanvas.pixels[index + 1] = color.g;
+    RenderCanvas.pixels[index + 2] = color.b;
+    RenderCanvas.pixels[index + 3] = 255;
+}
+
+function drawLine(RenderCanvas, a, b, color, lineWidth = 1) {
+    let x0 = Math.floor(a.x);
+    let y0 = Math.floor(a.y);
+    const x1 = Math.floor(b.x);
+    const y1 = Math.floor(b.y);
+  
+    const dx = Math.abs(x1 - x0);
+    const dy = Math.abs(y1 - y0);
+  
+    const sx = x0 < x1 ? 1 : -1;
+    const sy = y0 < y1 ? 1 : -1;
+  
+    let err = dx - dy;
+  
+    const half = Math.floor(lineWidth / 2);
+  
+    function drawThickPixel(x, y) {
+      for (let py = -half; py <= half; py++) {
+        for (let px = -half; px <= half; px++) {
+          drawPixel(
+            RenderCanvas,
+            new Pos(x + px, y + py),
+            color
+          );
+        }
+      }
+    }
+  
+    while (true) {
+      drawThickPixel(x0, y0);
+  
+      if (x0 === x1 && y0 === y1) break;
+  
+      const e2 = err * 2;
+  
+      if (e2 > -dy) {
+        err -= dy;
+        x0 += sx;
+      }
+  
+      if (e2 < dx) {
+        err += dx;
+        y0 += sy;
+      }
+    }
+}
+
+function translate_z(pos, dz) {
+  return new Pos(pos.x, pos.y, pos.z + dz);
+}
+
+function rotateY(p, angle) {
+  const r = new Pos();
+  r.y = p.y;
+  r.x = p.x * Math.cos(angle) + p.z * Math.sin(angle);
+  r.z = -p.x * Math.sin(angle) + p.z * Math.cos(angle);
+  return r;
+}
+
+function rotateX(p, angle) {
+  const r = new Pos();
+  r.x = p.x;
+  r.y = p.y * Math.cos(angle) - p.z * Math.sin(angle);
+  r.z = p.y * Math.sin(angle) + p.z * Math.cos(angle);
+  return r;
+}
+
+function rotateZ(p, angle) {
+  const r = new Pos();
+  r.x = p.x * Math.cos(angle) - p.y * Math.sin(angle);
+  r.y = p.x * Math.sin(angle) + p.y * Math.cos(angle);
+  r.z = p.z;
+  return r;
+}
+
+function drawRect(RenderCanvas, rect, color) {
+  for (let y = rect.y; y < rect.y + rect.height; y++) {
+    for (let x = rect.x; x < rect.x + rect.width; x++) {
+      const p = new Pos(x, y);
+      drawPixel(RenderCanvas, p, color);
+    }
+  }
+}
+
+function drawCircle(RenderCanvas, circle, color) {
+  for (let y = -circle.radius; y <= circle.radius; y++) {
+    for (let x = -circle.radius; x <= circle.radius; x++) {
+      if (x * x + y * y <= circle.radius * circle.radius) {
+        const p = new Pos(circle.x + x, circle.y + y);
+        drawPixel(RenderCanvas, p, color);
+      }
+    }
+  }
+}
+
+function drawTriangle(RenderCanvas, a, b, c, color) {
+  drawLine(RenderCanvas, a, b, color);
+  drawLine(RenderCanvas, b, c, color);
+  drawLine(RenderCanvas, c, a, color);
+}
+
+function edgeFunction(a, b, c)
+{
+    return (c.x - a.x) * (b.y - a.y) -
+           (c.y - a.y) * (b.x - a.x);
+}
+
+
+function fillTriangle(RenderCanvas, a, b, c, color)
+{
+    // Find bounding box
+    const minX = Math.floor(Math.min(a.x, b.x, c.x));
+    const maxX = Math.ceil(Math.max(a.x, b.x, c.x));
+
+    const minY = Math.floor(Math.min(a.y, b.y, c.y));
+    const maxY = Math.ceil(Math.max(a.y, b.y, c.y));
+
+
+    const area = edgeFunction(a, b, c);
+
+
+    for (let y = minY; y <= maxY; y++)
+    {
+        for (let x = minX; x <= maxX; x++)
+        {
+            const p = new Pos(x, y);
+
+
+            const w0 = edgeFunction(b, c, p);
+            const w1 = edgeFunction(c, a, p);
+            const w2 = edgeFunction(a, b, p);
+
+
+            if (
+                (w0 >= 0 && w1 >= 0 && w2 >= 0) ||
+                (w0 <= 0 && w1 <= 0 && w2 <= 0)
+            )
+            {
+                drawPixel(
+                    RenderCanvas,
+                    p,
+                    color
+                );
+            }
+        }
+    }
+}
