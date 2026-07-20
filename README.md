@@ -64,6 +64,13 @@ demo/index.html
 
 No build system is required.
 
+Include it in Your Projects By:
+
+```bash
+<script src="RenderJs.js"><script>
+```
+Nothing else required!
+
 ---
 
 # Basic Example
