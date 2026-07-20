@@ -206,31 +206,61 @@ Rotate a point around the X, Y, or Z axis.
 
 # 3D Model Loading (JSON)
 
-RenderJS supports loading custom 3D models using a simple JSON format.
+RenderJS supports loading custom 3D models from a JSON file.
 
-Models use two sections:
+A model contains two arrays:
 
-- `VS` → Vertices (3D points)
-- `FS` → Faces (polygon vertex indexes)
+- `vs` → Vertex positions
+- `fs` → Faces (arrays of vertex indices)
 
-Example model:
+Each vertex is an object with `x`, `y`, and `z` coordinates.
+
+Example:
 
 ```json
 {
-    "VS": {
-        "0": [-1,-1,-1],
-        "1": [1,-1,-1],
-        "2": [1,1,-1],
-        "3": [-1,1,-1]
-    },
+    "vs": [
+        { "x": -1, "y": -1, "z": -1 },
+        { "x":  1, "y": -1, "z": -1 },
+        { "x":  1, "y":  1, "z": -1 },
+        { "x": -1, "y":  1, "z": -1 }
+    ],
 
-    "FS": {
-        "Cube": [
-            [0,1,2,3]
-        ]
-    }
+    "fs": [
+        [0, 1, 2, 3]
+    ]
 }
 ```
+
+## Loading a Model
+
+```javascript
+await loadModel("model.json");
+```
+
+The loader populates two global arrays:
+
+- `cube` — Array of `Pos` objects representing the model's vertices.
+- `edges` — Array of edge index pairs generated automatically from the faces.
+
+Each face is converted into wireframe edges by connecting consecutive vertices and automatically closing the polygon.
+
+For example, the face:
+
+```json
+[0, 1, 2, 3]
+```
+
+produces the edges:
+
+```text
+0 → 1
+1 → 2
+2 → 3
+3 → 0
+```
+
+Faces may contain any number of vertices (triangles, quads, or n-gons), allowing RenderJS to render arbitrary wireframe models.
 
 ---
 

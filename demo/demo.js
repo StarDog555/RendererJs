@@ -24,9 +24,7 @@
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
-
-function resize()
-{
+function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -40,7 +38,6 @@ function resize()
     size.HEIGHT = canvas.height;
 }
 
-
 const buffer = new RenderCanvas(
     window.innerWidth,
     window.innerHeight
@@ -51,65 +48,43 @@ const size = new Screen(
     window.innerHeight
 );
 
-
 window.addEventListener("resize", resize);
-
 
 const green = new Color(0, 255, 0);
 const black = new Color(0, 0, 0);
 
-
-const cube = [
-    new Pos(-1,-1,-1),
-    new Pos( 1,-1,-1),
-    new Pos( 1, 1,-1),
-    new Pos(-1, 1,-1),
-
-    new Pos(-1,-1,1),
-    new Pos( 1,-1,1),
-    new Pos( 1, 1,1),
-    new Pos(-1, 1,1)
-];
-
-
-const edges = [
-    [0,1],[1,2],[2,3],[3,0],
-    [4,5],[5,6],[6,7],[7,4],
-    [0,4],[1,5],[2,6],[3,7]
-];
-
+// These will be filled by loadModel()
+let cube = [];
+let edges = [];
 
 let angle = 0;
 
-
-function loop()
-{
+function loop() {
     clearRenderCanvas(buffer, black);
 
+    const projected = [];
 
-    let projected = [];
+    const SCALE = 4.5; // Increase this value
 
+    for (const vertex of cube){
+        let p = new Pos(
+            vertex.x * SCALE,
+            vertex.y * SCALE,
+            vertex.z * SCALE
+        );
 
-    for (let vertex of cube)
-    {
-        let p = rotateY(vertex, angle);
         p = rotateY(p, angle);
+        p = rotateY(p, angle * 0.5);
 
-
-        // move cube away from camera
-        p.z += 4;
-
+        p = translate_z(p, 4);
 
         p = project(p);
         p = screen(p, size);
 
-
         projected.push(p);
     }
 
-
-    for (let edge of edges)
-    {
+    for (const edge of edges) {
         drawLine(
             buffer,
             projected[edge[0]],
@@ -119,16 +94,20 @@ function loop()
         );
     }
 
-
     updateRenderCanvas(buffer, ctx);
 
-
     angle += 0.02;
-
 
     requestAnimationFrame(loop);
 }
 
+async function start() {
+    resize();
 
-resize();
-loop();
+    // Load model.json from the same directory
+    await loadModel("model.json");
+
+    loop();
+}
+
+start();
