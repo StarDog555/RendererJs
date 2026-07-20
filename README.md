@@ -7,6 +7,7 @@ A lightweight software rendering library written in pure JavaScript. RenderJS, s
 Perfect for learning graphics programming, building retro-style games, creating software renderers, or experimenting with 2D/3D rendering algorithms.
 
 🌐 **Live Demo:** https://renderjsdemo.netlify.app/
+
 💡 **Inspired By:** https://www.youtube.com/watch?v=qjWkNZ0SXfo&t=162s
 
 ---
