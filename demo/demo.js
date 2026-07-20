@@ -70,7 +70,7 @@ function loop()
     for (let vertex of cube)
     {
         let p = rotateY(vertex, angle);
-        p = rotateX(p, angle);
+        p = rotateY(p, angle);
 
 
         // move cube away from camera
