@@ -238,7 +238,7 @@ Example:
 ## Loading a Model
 
 ```javascript
-await loadModel("model.json");
+await loadModel("FILENAME.json");
 ```
 
 The loader populates two global arrays:
