@@ -1,8 +1,8 @@
 # RendererJS
 
-> **Simple Yet Powerful JavaScript Native Rendering Library**
+> **Simple Yet Powerful Native JavaScript Rendering Library**
 
-A lightweight software rendering library written in pure JavaScript. RenderJS renders directly into a pixel buffer using the HTML5 Canvas API, giving you complete control over every pixel.
+A lightweight software rendering library written in pure JavaScript. RenderJS, short for RendererJS, renders directly into a pixel buffer using the HTML5 Canvas API, giving you complete control over every pixel.
 
 Perfect for learning graphics programming, building retro-style games, creating software renderers, or experimenting with 2D/3D rendering algorithms.
 
