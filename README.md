@@ -8,6 +8,10 @@ Perfect for learning graphics programming, building retro-style games, creating 
 
 🌐 **Live Demo:** https://renderjsdemo.netlify.app/
 
+💡 **Inspired By:** https://www.youtube.com/watch?v=qjWkNZ0SXfo
+
+🎬 **Model By:** https://github.com/Max-Kawula/penger-obj
+
 ---
 
 ## Features
@@ -35,11 +39,10 @@ ROOT/
 ├── RenderJs.js          # Main JavaScript rendering library
 ├── README.md
 │
-├── CLib/
-│   └── RenderJs.h       # SDL3 C version of the library
 │
 ├── demo/
 │   ├── index.html
+│   ├── object.json
 │   ├── demo.js
 │   └── lib/
 └──     └── RenderJs.js
