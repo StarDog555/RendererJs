@@ -10,6 +10,8 @@ Perfect for learning graphics programming, building retro-style games, creating 
 
 💡 **Inspired By:** https://www.youtube.com/watch?v=qjWkNZ0SXfo
 
+🎬 **Model By:** https://github.com/Max-Kawula/penger-obj
+
 ---
 
 ## Features
