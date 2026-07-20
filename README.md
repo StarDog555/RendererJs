@@ -8,7 +8,7 @@ Perfect for learning graphics programming, building retro-style games, creating 
 
 🌐 **Live Demo:** https://renderjsdemo.netlify.app/
 
-💡 **Inspired By:** https://www.youtube.com/watch?v=qjWkNZ0SXfo&t=162s
+💡 **Inspired By:** https://www.youtube.com/watch?v=qjWkNZ0SXfo
 
 ---
 
