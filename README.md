@@ -37,11 +37,10 @@ ROOT/
 ├── RenderJs.js          # Main JavaScript rendering library
 ├── README.md
 │
-├── CLib/
-│   └── RenderJs.h       # SDL3 C version of the library
 │
 ├── demo/
 │   ├── index.html
+│   ├── object.json
 │   ├── demo.js
 │   └── lib/
 └──     └── RenderJs.js
