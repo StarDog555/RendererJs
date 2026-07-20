@@ -232,6 +232,8 @@ Example model:
 }
 ```
 
+---
+
 # Classes
 
 ## Pos
