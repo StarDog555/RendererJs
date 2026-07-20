@@ -204,6 +204,34 @@ Rotate a point around the X, Y, or Z axis.
 
 ---
 
+# 3D Model Loading (JSON)
+
+RenderJS supports loading custom 3D models using a simple JSON format.
+
+Models use two sections:
+
+- `VS` → Vertices (3D points)
+- `FS` → Faces (polygon vertex indexes)
+
+Example model:
+
+```json
+{
+    "VS": {
+        "0": [-1,-1,-1],
+        "1": [1,-1,-1],
+        "2": [1,1,-1],
+        "3": [-1,1,-1]
+    },
+
+    "FS": {
+        "Cube": [
+            [0,1,2,3]
+        ]
+    }
+}
+```
+
 # Classes
 
 ## Pos
