@@ -1,4 +1,4 @@
-# RenderJS
+# RendererJS
 
 > **Simple Yet Powerful JavaScript Native Rendering Library**
 
