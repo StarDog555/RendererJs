@@ -416,5 +416,3 @@ MIT License
 ## Author
 
 Created by **StarDog555**
-
-Built for developers who want complete control over every pixel.
