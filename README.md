@@ -4,7 +4,7 @@
 
 A lightweight software rendering library written in pure JavaScript.
 
-RendererJS renders directly into a pixel buffer using the HTML5 Canvas API, giving developers control over rendering, pixels, geometry, cameras, and simple 3D pipelines.
+RendererJS renders directly into a pixel buffer using the HTML5 Canvas API, giving developers full control over pixels, geometry, cameras, and simple 3D pipelines.
 
 Perfect for learning graphics programming, building retro-style engines, experimenting with software rendering, creating wireframe viewers, or understanding how rendering systems work internally.
 
@@ -29,7 +29,7 @@ Perfect for learning graphics programming, building retro-style engines, experim
 * 📦 Rectangle rendering
 * ⚪ Circle rendering
 * 📏 Bresenham line drawing
-* 🎥 Built-in Camera system
+* 🎥 Built-in camera system
 * 🌍 World → Camera transformations
 * 🔍 Perspective projection
 * 🔄 X/Y/Z rotation helpers
@@ -55,7 +55,6 @@ RendererJs/
 │   └── Helper.js
 │
 ├── demo/
-│   │
 │   ├── lib/
 │   │   ├── Renderer.js
 │   │   └── Helper.js
@@ -69,54 +68,57 @@ RendererJs/
 ├── README.md
 ├── LICENSE
 └── .git/
-Getting Started
+```
+
+---
+
+# Getting Started
 
 Clone the repository:
 
-git clone https://github.com/YOUR_USERNAME/RendererJs.git
+```bash
+git clone https://github.com/StarDog555/RenderJs.git
+```
 
 Open:
 
+```text
 demo/index.html
+```
 
 RendererJS uses ES Modules.
 
 Example:
 
+```javascript
 import * as R from "./lib/Renderer.js";
+```
 
 No package manager or build system is required.
 
-Basic Example
+---
+
+# Basic Example
+
+```html
 <canvas id="screen"></canvas>
 
 <script type="module">
 
 import * as R from "./lib/Renderer.js";
 
-const canvas =
-document.getElementById("screen");
+const canvas = document.getElementById("screen");
+const ctx = canvas.getContext("2d");
 
-const ctx =
-canvas.getContext("2d");
-
-
-const buffer =
-new R.RenderCanvas(
+const buffer = new R.RenderCanvas(
     640,
     480
 );
 
-
 R.clearRenderCanvas(
     buffer,
-    new R.Color(
-        20,
-        20,
-        20
-    )
+    new R.Color(20,20,20)
 );
-
 
 R.drawCircle(
     buffer,
@@ -132,13 +134,13 @@ R.drawCircle(
     )
 );
 
-
 R.updateRenderCanvas(
     buffer,
     ctx
 );
 
 </script>
+```
 
 ---
 
@@ -152,17 +154,17 @@ R.clearRenderCanvas(
     backgroundColor
 );
 
-
 // Draw scene here
-
 
 R.updateRenderCanvas(
     buffer,
     ctx
 );
+```
 
 Animation example:
 
+```javascript
 function render(){
 
     R.clearRenderCanvas(
@@ -174,32 +176,40 @@ function render(){
         )
     );
 
-
     // Draw objects
-
 
     R.updateRenderCanvas(
         buffer,
         ctx
     );
 
-
     requestAnimationFrame(render);
 }
 
-
 render();
-Drawing Functions
-Pixels
+```
+
+---
+
+# Drawing Functions
+
+## Pixels
+
+```javascript
 drawPixel(
     buffer,
     position,
     color
 );
+```
 
 Draws a single pixel directly into the framebuffer.
 
-Lines
+---
+
+## Lines
+
+```javascript
 drawLine(
     buffer,
     start,
@@ -207,31 +217,45 @@ drawLine(
     color,
     thickness
 );
+```
 
 Uses Bresenham's line algorithm with adjustable thickness.
 
-Rectangles
+---
+
+## Rectangles
+
+```javascript
 drawRect(
     buffer,
     rect,
     color
 );
+```
 
 Draws filled rectangles.
 
-Circles
+---
+
+## Circles
+
+```javascript
 drawCircle(
     buffer,
     circle,
     color
 );
+```
 
 Draws filled circles.
 
-Triangles
+---
+
+## Triangles
 
 Outlined triangle:
 
+```javascript
 drawTriangle(
     buffer,
     a,
@@ -239,9 +263,11 @@ drawTriangle(
     c,
     color
 );
+```
 
 Filled triangle:
 
+```javascript
 fillTriangle(
     buffer,
     a,
@@ -249,195 +275,196 @@ fillTriangle(
     c,
     color
 );
+```
 
 Uses triangle rasterization.
 
-Camera System
+---
+
+# Camera System
 
 RendererJS includes a simple 3D perspective camera.
 
 Create a camera:
 
-const camera =
-new R.Camera(
+```javascript
+const camera = new R.Camera(
     0,
     0,
     -5,
     90
 );
+```
 
 Move:
 
+```javascript
 camera.move(
     x,
     y,
     z
 );
+```
 
 Rotate:
 
+```javascript
 camera.rotate(
     pitch,
     yaw,
     roll
 );
+```
 
 Convert world position:
 
+```javascript
 camera.worldToCamera(
     point
 );
+```
 
 Project 3D position:
 
+```javascript
 camera.projectCamera(
     point,
     width,
     height
 );
+```
 
-The camera supports:
+Supported:
 
-Position movement
-Pitch rotation
-Yaw rotation
-Roll rotation
-Perspective projection
-3D Math Helpers
-Projection
+* Position movement
+* Pitch rotation
+* Yaw rotation
+* Roll rotation
+* Perspective projection
+
+---
+
+# 3D Math Helpers
+
+## Projection
+
+```javascript
 project(point);
+```
 
 Converts a 3D point into normalized projection space.
 
-Screen Conversion
+## Screen Conversion
+
+```javascript
 screen(
     point,
     screenSize
 );
+```
 
 Converts normalized coordinates into pixels.
 
-Translation
+## Translation
+
+```javascript
 translate_z(
     point,
     distance
 );
+```
 
 Moves a point along the Z axis.
 
-Rotation
-rotateX(
-    point,
-    angle
-);
+## Rotation
 
-rotateY(
-    point,
-    angle
-);
+```javascript
+rotateX(point, angle);
 
-rotateZ(
-    point,
-    angle
-);
+rotateY(point, angle);
 
-Rotate around X, Y, and Z axes.
+rotateZ(point, angle);
+```
 
 Angles use radians.
 
-3D Model Loading
+---
 
-RendererJS supports loading JSON and OBJ models.
+# 3D Model Loading
 
-JSON Models
+RendererJS supports JSON and OBJ models.
 
-Load a JSON model:
+## JSON Models
 
+```javascript
 await R.loadJsonModel(
     "model.json"
 );
+```
 
-The loader generates:
+Generates:
 
-Vertex positions
-Face data
-Wireframe edges
-
-Example conversion:
-
-Face:
-
-0 1 2 3
-
-
-Creates:
-
-0 -> 1
-1 -> 2
-2 -> 3
-3 -> 0
+* Vertex positions
+* Face data
+* Wireframe edges
 
 Supports:
 
-Triangles
-Quads
-Polygons
-OBJ Models
+* Triangles
+* Quads
+* Polygons
 
-RendererJS includes a universal OBJ loader.
+---
 
-Example:
+## OBJ Models
 
+```javascript
 const model =
 await R.LoadObjModel(
     "./Model.obj"
 );
+```
 
 Returns:
 
+```javascript
 {
     vertices,
     texcoords,
     normals,
     indices
 }
+```
 
-Supported OBJ features:
+Supported:
 
-✅ Vertex positions (v)
-✅ Texture coordinates (vt)
-✅ Normals (vn)
-✅ Faces (f)
-✅ Triangles
-✅ Quads
-✅ N-gons
-✅ Negative indexes
+* Vertex positions (`v`)
+* Texture coordinates (`vt`)
+* Normals (`vn`)
+* Faces (`f`)
+* Triangles
+* Quads
+* N-gons
+* Negative indexes
 
-Texture and Image System
+---
 
-RendererJS includes basic image handling.
+# Texture and Image System
 
 Load an image:
 
+```javascript
 const image =
 await R.LoadImage(
     "./images/texture.png"
 );
+```
 
-Returns a:
+Creates a `Texture` object.
 
-Texture
+## Texture Properties
 
-object.
-
-Texture Class
-
-Create a texture:
-
-new R.Texture(image);
-
-Contains:
-
+```text
 offsetX
 offsetY
 
@@ -452,25 +479,26 @@ repeatY
 wrapMode
 
 flipY
+```
 
-These values allow future texture transformations.
+Apply a texture:
 
-Applying Images
-
-Apply a texture to a mesh:
-
+```javascript
 R.ApplyImage(
     mesh,
     texture
 );
+```
 
-Apply a texture to one face:
+Apply to a face:
 
+```javascript
 R.ApplyImage(
     mesh,
     texture,
     faceID
 );
+```
 
 ---
 
@@ -484,194 +512,248 @@ new R.Pos(
     y,
     z
 );
+```
 
 Stores a 3D position.
 
-Color
+## Color
+
+```javascript
 new R.Color(
     r,
     g,
     b
 );
+```
 
-Stores an RGB color.
+Stores RGB color values.
 
-Screen
+## Screen
+
+```javascript
 new R.Screen(
     width,
     height
 );
+```
 
 Stores screen dimensions.
 
-RenderCanvas
+## RenderCanvas
+
+```javascript
 new R.RenderCanvas(
     width,
     height
 );
+```
 
 Creates a software framebuffer using:
 
+```text
 Uint8ClampedArray
-Rect
+```
+
+## Rect
+
+```javascript
 new R.Rect(
     width,
     height,
     x,
     y
 );
+```
 
 Rectangle primitive.
 
-Circle
+## Circle
+
+```javascript
 new R.Circle(
     radius,
     x,
     y
 );
+```
 
 Circle primitive.
 
-Camera
+## Camera
+
+```javascript
 new R.Camera(
     x,
     y,
     z,
     fov
 );
+```
 
 3D perspective camera.
 
-Texture
+## Texture
+
+```javascript
 new R.Texture(
     image
 );
+```
 
 Stores image texture data.
 
-Utility Functions
+---
+
+# Utility Functions
 
 Resize canvas:
 
+```javascript
 R.Set_Size(
     ctx,
     width,
     height
 );
+```
 
 Clear framebuffer:
 
+```javascript
 R.clearRenderCanvas(
     buffer,
     color
 );
+```
 
 Update canvas:
 
+```javascript
 R.updateRenderCanvas(
     buffer,
     ctx
 );
+```
 
 Load image:
 
-await R.LoadImage(
-    path
-);
+```javascript
+await R.LoadImage(path);
+```
 
 Load OBJ:
 
-await R.LoadObjModel(
-    path
-);
+```javascript
+await R.LoadObjModel(path);
+```
 
-Load JSON model:
+Load JSON:
 
-await R.loadJsonModel(
-    path
-);
-Included Demo
+```javascript
+await R.loadJsonModel(path);
+```
+
+---
+
+# Included Demo
 
 RendererJS includes a demo project:
 
+```text
 demo/
+```
 
-The demo includes:
+Includes:
 
-ES Module setup
-Camera controls
-Mouse look
-OBJ model loading
-Image backgrounds
-Wireframe rendering
-Texture experiments
+* ES Module setup
+* Camera controls
+* Mouse look
+* OBJ model loading
+* Image backgrounds
+* Wireframe rendering
+* Texture experiments
 
 Controls:
 
+```text
 W A S D  - Move camera
 
 Mouse    - Look around
 
 Q / E    - Change background depth
-Browser Support
+```
+
+---
+
+# Browser Support
 
 RendererJS works in modern browsers supporting:
 
-HTML5 Canvas
-ES Modules
-Fetch API
-ImageData
-Uint8ClampedArray
-JavaScript Classes
-Roadmap
+* HTML5 Canvas
+* ES Modules
+* Fetch API
+* ImageData
+* Uint8ClampedArray
+* JavaScript Classes
 
-Completed:
+---
 
- Pixel framebuffer
- Primitive drawing
- Triangle rasterization
- Camera system
- Perspective projection
- Rotation helpers
- JSON model loading
- OBJ model loading
- Image loading
- Texture helper system
+# Roadmap
 
-Planned:
+## Completed
 
- Full texture mapping
- Triangle UV rendering
- Depth buffer (Z-buffer)
- Back-face culling
- Lighting system
- Materials
- Matrix math library
- Mesh class
- Scene graph
- Frustum clipping
- Animation system
- Sprite renderer
- Orthographic camera
- WebGPU backend
-Use Cases
+✅ Pixel framebuffer
+✅ Primitive drawing
+✅ Triangle rasterization
+✅ Camera system
+✅ Perspective projection
+✅ Rotation helpers
+✅ JSON model loading
+✅ OBJ model loading
+✅ Image loading
+✅ Texture helper system
+
+## Planned
+
+* Full texture mapping
+* Triangle UV rendering
+* Depth buffer (Z-buffer)
+* Back-face culling
+* Lighting system
+* Materials
+* Matrix math library
+* Mesh class
+* Scene graph
+* Frustum clipping
+* Animation system
+* Sprite renderer
+* Orthographic camera
+* WebGPU backend
+
+---
+
+# Use Cases
 
 RendererJS can be used for:
 
-Learning computer graphics
-Software rendering experiments
-Retro game engines
-Pixel art tools
-Wireframe viewers
-2D/3D experiments
-Graphics programming education
-Rendering algorithm testing
-License
+* Learning computer graphics
+* Software rendering experiments
+* Retro game engines
+* Pixel art tools
+* Wireframe viewers
+* 2D/3D experiments
+* Graphics programming education
+* Rendering algorithm testing
+
+---
+
+# License
 
 MIT License
 
 Copyright (c) 2026 StarDog555
 
-Author
+---
 
-Created by StarDog555
+# Author
+
+Created by **StarDog555**
