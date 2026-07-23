@@ -20,224 +20,281 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
+import * as R from "./lib/Renderer.js";
 
-window.alert("Use W, A, S, D and Mouse to Move There are some bugs this is a demo...");
+window.alert("WASD Move | Mouse Look | Q/E Space Depth");
 
 const canvas = document.getElementById("screen");
 const ctx = canvas.getContext("2d");
 
-const buffer = new RenderCanvas(
-    window.innerWidth,
-    window.innerHeight
-);
+const buffer = new R.RenderCanvas(innerWidth, innerHeight);
+const size = new R.Screen(innerWidth, innerHeight);
 
-const size = new Screen(
-    window.innerWidth,
-    window.innerHeight
-);
+const cyan = new R.Color(0,220,255);
+const black = new R.Color(0,0,0);
 
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    buffer.width = canvas.width;
-    buffer.height = canvas.height;
-    buffer.pixels = new Uint8ClampedArray(
-        buffer.width * buffer.height * 4
-    );
-
-    size.WIDTH = canvas.width;
-    size.HEIGHT = canvas.height;
-}
-
-window.addEventListener("resize", resize);
-
-const green = new Color(0, 255, 0);
-const black = new Color(0, 0, 0);
+const camera = new R.Camera(0,0,-8,90);
 
 let cube = [];
 let edges = [];
 
-const camera = new Camera(
-    0,
-    0,
-    -8,
-    90
-);
+let space;
+let angle = 0;
+let spaceRotation = 0;
+let bgZ = 1;
 
 
-// INPUT
+function resize(){
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    buffer.width = innerWidth;
+    buffer.height = innerHeight;
+
+    buffer.pixels =
+        new Uint8ClampedArray(
+            innerWidth * innerHeight * 4
+        );
+
+    size.WIDTH = innerWidth;
+    size.HEIGHT = innerHeight;
+}
+
+addEventListener("resize",resize);
+
+
 
 const keys = {};
 
-window.addEventListener("keydown", e => {
+onkeydown = e =>
     keys[e.key.toLowerCase()] = true;
-});
 
-window.addEventListener("keyup", e => {
+onkeyup = e =>
     keys[e.key.toLowerCase()] = false;
-});
 
 
-// MOUSE LOOK
 
-let mouseLocked = false;
-const mouseSensitivity = 0.002;
+let locked = false;
 
-canvas.addEventListener("click", () => {
+canvas.onclick = () =>
     canvas.requestPointerLock();
-});
 
-document.addEventListener("pointerlockchange", () => {
-    mouseLocked =
-        document.pointerLockElement === canvas;
-});
 
-document.addEventListener("mousemove", e => {
-    if (!mouseLocked)
-        return;
+document.onpointerlockchange = () =>
+    locked =
+    document.pointerLockElement === canvas;
 
-    camera.yaw -= e.movementX * mouseSensitivity;
-    camera.pitch += e.movementY * mouseSensitivity;
 
-    const limit = Math.PI / 2 - 0.05;
+document.onmousemove = e => {
+
+    if(!locked) return;
+
+    camera.yaw -= e.movementX * 0.002;
+    camera.pitch -= e.movementY * 0.002;
+
+    const limit = Math.PI/2 - 0.05;
 
     camera.pitch = Math.max(
         -limit,
-        Math.min(limit, camera.pitch)
+        Math.min(limit,camera.pitch)
     );
-});
+};
 
 
-// CAMERA
 
-function resetCamera() {
-    camera.position.x = 0;
-    camera.position.y = 0;
-    camera.position.z = -8;
+function updateCamera(){
 
-    camera.yaw = 0;
-    camera.pitch = 0;
-}
-
-
-function updateCamera() {
     const speed = 0.15;
 
-    const forwardX = Math.sin(camera.yaw);
-    const forwardZ = Math.cos(camera.yaw);
+    const fx = Math.sin(camera.yaw);
+    const fz = Math.cos(camera.yaw);
 
-    const rightX = Math.cos(camera.yaw);
-    const rightZ = -Math.sin(camera.yaw);
+    const rx = Math.cos(camera.yaw);
+    const rz = -Math.sin(camera.yaw);
 
-    if (keys["w"]) {
-        camera.position.x += forwardX * speed;
-        camera.position.z += forwardZ * speed;
+
+    if(keys.w){
+        camera.position.x += fx*speed;
+        camera.position.z += fz*speed;
     }
 
-    if (keys["s"]) {
-        camera.position.x -= forwardX * speed;
-        camera.position.z -= forwardZ * speed;
+    if(keys.s){
+        camera.position.x -= fx*speed;
+        camera.position.z -= fz*speed;
     }
 
-    if (keys["a"]) {
-        camera.position.x -= rightX * speed;
-        camera.position.z -= rightZ * speed;
+    if(keys.a){
+        camera.position.x -= rx*speed;
+        camera.position.z -= rz*speed;
     }
 
-    if (keys["d"]) {
-        camera.position.x += rightX * speed;
-        camera.position.z += rightZ * speed;
+    if(keys.d){
+        camera.position.x += rx*speed;
+        camera.position.z += rz*speed;
     }
 
-    if (keys[" "])
-        camera.position.y += speed;
 
-    if (keys["shift"])
-        camera.position.y -= speed;
+    if(keys.q)
+        bgZ += 0.02;
 
-    if (keys["r"])
-        resetCamera();
+    if(keys.e)
+        bgZ -= 0.02;
+
+
+    bgZ = Math.max(
+        0.3,
+        Math.min(3,bgZ)
+    );
 }
 
 
-// RENDER
 
-let angle = 0;
+function drawBackground(){
 
-function loop() {
+    if(!space)
+        return;
+
+
+    const scale =
+        Math.max(
+            innerWidth / 1024,
+            innerHeight / 1024
+        ) / bgZ;
+
+
+    R.DrawImage(
+        buffer,
+        space,
+        0,
+        0,
+        innerWidth * scale,
+        innerHeight * scale,
+        spaceRotation
+    );
+}
+
+
+
+function loop(){
+
     updateCamera();
 
-    clearRenderCanvas(
+
+    R.clearRenderCanvas(
         buffer,
         black
     );
 
+
+    drawBackground();
+
+
+
     const projected = [];
-    const SCALE = 4.5;
 
-    for (const vertex of cube) {
 
-        let p = new Pos(
-            vertex.x * SCALE,
-            vertex.y * SCALE,
-            vertex.z * SCALE
+    for(const v of cube){
+
+        let p = new R.Pos(
+            v.x*4.5,
+            v.y*4.5,
+            v.z*4.5
         );
 
-        // object rotation
-        p = rotateY(
+
+        p = R.rotateY(
             p,
             angle
         );
 
-        p = rotateY(
-            p,
-            angle * 0.5
-        );
-
-        // camera
-        p = camera.projectCamera(
-            p,
-            size.WIDTH,
-            size.HEIGHT
-        );
 
         projected.push(
-            p || new Pos(-100, -100, 0)
+            camera.projectCamera(
+                p,
+                size.WIDTH,
+                size.HEIGHT
+            )
+            ||
+            new R.Pos(-100,-100,0)
         );
     }
 
 
-    for (const edge of edges) {
-        drawLine(
+
+    for(const e of edges){
+
+        R.drawLine(
             buffer,
-            projected[edge[0]],
-            projected[edge[1]],
-            green,
+            projected[e[0]],
+            projected[e[1]],
+            cyan,
             3
         );
     }
 
 
-    updateRenderCanvas(
+
+    R.updateRenderCanvas(
         buffer,
         ctx
     );
 
+
     angle += 0.02;
+
 
     requestAnimationFrame(loop);
 }
 
 
-async function start() {
+
+async function start(){
+
     resize();
 
-    await loadModel(
-        "model.json"
-    );
+
+    const model =
+        await R.LoadObjModel(
+            "./Model.obj"
+        );
+
+
+    for(let i=0;i<model.vertices.length;i+=3){
+
+        cube.push(
+            new R.Pos(
+                model.vertices[i],
+                model.vertices[i+1],
+                model.vertices[i+2]
+            )
+        );
+    }
+
+
+
+    for(let i=0;i<model.indices.length;i+=3){
+
+        const a = model.indices[i];
+        const b = model.indices[i+1];
+        const c = model.indices[i+2];
+
+
+        edges.push(
+            [a,b],
+            [b,c],
+            [c,a]
+        );
+    }
+
+
+    space =
+        await R.LoadImage(
+            "./images/Space.png"
+        );
 
     loop();
 }
+
 
 start();
